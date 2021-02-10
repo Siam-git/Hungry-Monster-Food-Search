@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Hungry-Monster </title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" integrity="sha512-+4zCK9k+qNFUR5X+cKL9EIR+ZOhtIloNl9GIKS57V1MyNsYpYcUrUeQc9vNfzsWfV28IaLL3i96P9sdNyeRssA==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="meal-wrapper">
+            <div class="meal-search">
+
+                <div class="meal-search-box">
+                    <input type="text" class="search-control" placeholder="Search Food" id="search-input">
+                    <button type="submit" class="search-btn btn" id="search-btn">
+            <i class = "fas fa-search"></i>
+          </button>
+                </div>
+            </div>
+
+            <div class="meal-result">
+                <div id="meal">
+
+                    <!-- <div class = "meal-item">
+            <div class = "meal-img">
+              <img src = "image/food.png" alt = "food">
+            </div>
+            <div class = "meal-name">
+              <h3>cheese pasta</h3>
+              <a href = "#" class = "recipe-btn">item details</a>
+            </div>
+          </div> 
+           -->
+                </div>
+            </div>
+
+
+            <div class="meal-details">
+                <button type="button" class="btn recipe-close-btn" id="recipe-close-btn">
+          <i class = "fas fa-times"></i>
+        </button>
+
+
+                <div class="meal-details-content">
+                    <!-- <h2 class = "recipe-title">Meals Name Here</h2>
+          <p class = "recipe-category">Category Name</p>
+          <div class = "recipe-instruct">
+            <h3>Instructions:</h3>
+            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Amet aliquam voluptatibus ad obcaecati magnam, esse numquam nisi ut adipisci in?</p>
+          </div>
+          <div class = "recipe-meal-img">
+            <img src = "image/food.png" alt = "">
+          </div> -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script>
+        const searchBtn = document.getElementById('search-btn');
+        const mealList = document.getElementById('meal');
+        const mealDetailsContent = document.querySelector('.meal-details-content');
+        const recipeCloseBtn = document.getElementById('recipe-close-btn');
+
+        searchBtn.addEventListener('click', getMealList);
+        mealList.addEventListener('click', getMealRecipe);
+        recipeCloseBtn.addEventListener('click', () => {
+            mealDetailsContent.parentElement.classList.remove('showRecipe');
+        });
+
+
+        function getMealList() {
+            let searchInputTxt = document.getElementById('search-input').value;
+            fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?i=${searchInputTxt}`)
+                .then(response => response.json())
+                .then(data => {
+                    let html = "";
+                    if (data.meals) {
+                        data.meals.forEach(meal => {
+                            html += `
+                  <div class = "meal-item" data-id="${meal.idMeal}">
+                    <div class = "meal-img">
+                        <img src = "${meal.strMealThumb}" alt="food">
+                   </div>
+                   <div class = "meal-name">
+                        <h3>${meal.strMeal}</h3>
+                        <a href = "#" class = "recipe-btn">item details</a>
+                   </div>
+                 </div> 
+               `;
+
+                        });
+                    } else {
+                        html = "Not Matched!";
+                        mealList.classList.add('notFound');
+
+                    }
+
+                    mealList.innerHTML = html;
+                });
+        }
+
+        function getMealRecipe(e) {
+            e.preventDefault();
+            if (e.target.classList.contains('recipe-btn')) {
+                let mealItem = e.target.parentElement.parentElement;
+                fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${mealItem.dataset.id}`)
+                    .then(response => response.json())
+                    .then(data => mealRecipeModal(data.meals));
+
+            }
+        }
+
+        function mealRecipeModal(meal) {
+            console.log(meal);
+            meal = meal[0];
+            let html = `
+        <h2 class = "recipe-title">Mea${meal.strMeal}</h2>
+        <p class = "recipe-category">${meal.strCategory}</p>
+        <div class = "recipe-instruct">
+           <h3>Instructions:</h3>
+           <p>${meal.strInstructions}</p>
+        </div>
+    <div class = "recipe-meal-img">
+      <img src = "${meal.strMealThumb}" alt = "">
+    </div>
+    `;
+            mealDetailsContent.innerHTML = html;
+            mealDetailsContent.parentElement.classList.add('showRecipe');
+
+        }
+    </script>
+
+</body>
+
+</html>
